@@ -45,9 +45,9 @@ func ShortenURL(c *fiber.Ctx) error {
 
 	var id string
 	if body.CustomShort == "" {
-		id = "localhost:3000/" + uuid.New().String()[:6]
+		id = uuid.New().String()[:6]
 	} else {
-		id = "localhost:3000/" + body.CustomShort
+		id = body.CustomShort
 	}
 
 	r := database.CreateClient(0)
@@ -67,15 +67,13 @@ func ShortenURL(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "unable to set data in Redis"})
 	}
 
-	// Формируем ответ
 	response := response{
 		URL:             body.URL,
-		CustomShort:     id,
+		CustomShort:     "localhost:3000/" + id,
 		Expiry:          body.Expiry,
-		XRateRemaining:  0, // Убираем информацию о rate limit
-		XRateLimitReset: 0, // Убираем информацию о reset времени
+		XRateRemaining:  0,
+		XRateLimitReset: 0,
 	}
 
-	// Возвращаем успешный ответ
 	return c.Status(fiber.StatusOK).JSON(response)
 }
